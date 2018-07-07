@@ -1,0 +1,19 @@
+version: '2'
+
+services:
+  db:
+    stdin_open: true
+    tty: true
+    image: postgres
+
+  web:
+    stdin_open: true
+    tty: true
+    build: .
+    # command: python src/backend/manage.py runserver --settings="src/backend/perliteio/settings.py" 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
