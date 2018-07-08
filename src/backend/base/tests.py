@@ -97,7 +97,7 @@ class TasksTest(APITestCase):
     def solutionsTests(self):
         task_id = self.global_state_dict['task_id']
         admin_solution = {
-            "code": "admin's code",
+            "code": "print(''.join(sorted(map(int, input().split()))))",
             "task":  "http://testserver" + reverse('task-detail', kwargs={'pk': task_id})
         }
 

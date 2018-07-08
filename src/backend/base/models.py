@@ -1,12 +1,6 @@
 from django.db import models
-from pygments.lexers import get_all_lexers
-from pygments.styles import get_all_styles
-
-
-LEXERS = [item for item in get_all_lexers() if item[1]]
-LANGUAGE_CHOICES = sorted([(item[1][0], item[0]) for item in LEXERS])
-STYLE_CHOICES = sorted((item, item) for item in get_all_styles())
-
+from django.dispatch import receiver
+from .tasks import check_solution
 
 # Create your models here.
 
@@ -34,3 +28,12 @@ class Solution(models.Model):
     status = models.NullBooleanField(null=True)
     task = models.ForeignKey(Task, related_name='solutions', on_delete=models.CASCADE)
     owner = models.ForeignKey('auth.User', related_name='solutions', on_delete=models.CASCADE)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super(Solution, self).save(force_insert, force_update, using, update_fields)
+
+
+@receiver(models.signals.post_save, sender=Solution)
+def solution_execute_after_save(sender, instance, created, *args, **kwargs):
+    if created:
+        check_solution(instance.id)

@@ -1,6 +1,17 @@
 version: '2'
 
 services:
+  rabbit:
+    stdin_open: true
+    tty: true
+    hostname: "rabbit"
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: "user"
+      RABBITMQ_DEFAULT_PASS: "password"
+    ports:
+      - "5672:5672"
+
   db:
     stdin_open: true
     tty: true
@@ -10,10 +21,13 @@ services:
     stdin_open: true
     tty: true
     build: .
-    # command: python src/backend/manage.py runserver --settings="src/backend/perliteio/settings.py" 0.0.0.0:8000
+    # command: python src/backend/manage.py migrate && celery -A src/backend/perliteio worker --loglevel=info
+    environment:
+      - EXECUTOR=Celery
     volumes:
       - .:/code
     ports:
       - "8000:8000"
     depends_on:
       - db
+      - rabbit
